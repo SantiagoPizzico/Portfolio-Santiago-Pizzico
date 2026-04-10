@@ -1,13 +1,5 @@
 # 💻 Santiago Pizzico Portfolio
 
-<div align="center">
-  <img src="https://picsum.photos/seed/terminal/800/400" alt="Banner" width="100%" style="border-radius: 10px; margin-bottom: 20px;" />
-  
-  **Un viaje a través de la terminal: Minimalismo, Código y Diseño.**
-  
-  [Demo en vivo](https://ais-dev-gtppvgoz4mei5kw3xrvdlf-107820539673.us-east5.run.app) • [Contacto](#-contacto)
-</div>
-
 ---
 
 ## 🎨 El Concepto
@@ -47,5 +39,5 @@ Si te gusta lo que ves o quieres colaborar en algún proyecto, ¡hablemos!
 ---
 
 <div align="center">
-  Hecho con ❤️ por Santiago Pizzico
+  Hecho por Santiago Pizzico
 </div>
