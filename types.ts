@@ -5,7 +5,6 @@ export interface Experience {
   period: string;
   description: string;
   tasks: string[];
-  contact?: string;
 }
 
 export interface Education {
@@ -22,10 +21,22 @@ export interface SkillCategory {
 
 export interface Project {
   name: string;
-  url: string;
+  url?: string;
+  repo?: string;
+  image?: string;
+  type: 'cliente' | 'personal' | 'academico';
+  year: number;
   description: string;
   stack: string[];
-  status: 'Live' | 'Development' | 'Offline';
+  status: 'Live' | 'Development' | 'Repo' | 'Offline';
+}
+
+export interface BusinessOffer {
+  title: string;
+  text: string;
+  bullets: string[];
+  ctaLabel: string;
+  whatsappMessage: string;
 }
 
 export interface Language {

@@ -1,17 +1,40 @@
 import React, { useState } from 'react';
-import { Terminal, User, Briefcase, Code, GraduationCap, Mail, MapPin, Download, Menu, X, ArrowRight, ExternalLink, Globe, MessageCircle, FileText, Linkedin, Github, Lock } from 'lucide-react';
+import { Terminal, User, Briefcase, Code, GraduationCap, Mail, MapPin, Menu, X, ArrowRight, Globe, MessageCircle, Linkedin, Github, Copy, Check, Store } from 'lucide-react';
 import Typewriter from './components/Typewriter';
 import TerminalWindow from './components/TerminalWindow';
 import Section from './components/Section';
 import ProjectCard from './components/ProjectCard';
 import FadeIn from './components/FadeIn';
-import { PROFILE, EXPERIENCE, EDUCATION, SKILLS, LANGUAGES, PROJECTS, CONTACT_CONFIG } from './constants';
+import { PROFILE, EXPERIENCE, EDUCATION, SKILLS, LANGUAGES, PROJECTS, CONTACT_CONFIG, BUSINESS_OFFER } from './constants';
+
+// Links de navegación compartidos entre desktop y móvil
+const NAV_LINKS = [
+  { id: 'about', label: '/about' },
+  { id: 'negocios', label: '/negocios' },
+  { id: 'projects', label: '/projects' },
+  { id: 'experience', label: '/experience' },
+  { id: 'skills', label: '/skills' },
+  { id: 'contact', label: '/contact' },
+];
 
 const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+  const [emailCopied, setEmailCopied] = useState(false);
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
+
+  // Copia el email al portapapeles como alternativa al cliente de correo
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(PROFILE.email);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch {
+      // Fallback para navegadores sin permiso de portapapeles
+      window.prompt('Copiá el email manualmente:', PROFILE.email);
+    }
+  };
 
   // Función para desplazarse a una sección específica
   const scrollTo = (id: string) => {
@@ -22,20 +45,18 @@ const App: React.FC = () => {
     closeMenu();
   };
 
-  // Función para generar enlace de WhatsApp
-  const getWhatsAppLink = () => {
+  // Función para generar enlace de WhatsApp con mensaje configurable
+  const getWhatsAppLink = (message: string = CONTACT_CONFIG.whatsappDefaultMessage) => {
     // Eliminamos caracteres no numéricos del teléfono para la API
-    const cleanPhone = PROFILE.phone.replace(/[^0-9]/g, ''); 
-    const text = encodeURIComponent(`Hola ${PROFILE.name}, vi tu portafolio web y me gustaría contactarte.`);
-    return `https://wa.me/${cleanPhone}?text=${text}`;
+    const cleanPhone = PROFILE.phone.replace(/[^0-9]/g, '');
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   };
 
-  // Función para generar enlace de Email (Gmail Direct)
+  // Función para generar enlace de Email (mailto: abre el cliente de correo del visitante)
   const getEmailLink = () => {
-    const to = PROFILE.email;
     const subject = encodeURIComponent(CONTACT_CONFIG.emailSubject);
     const body = encodeURIComponent(CONTACT_CONFIG.emailBody);
-    return `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+    return `mailto:${PROFILE.email}?subject=${subject}&body=${body}`;
   };
 
   return (
@@ -51,13 +72,7 @@ const App: React.FC = () => {
 
           {/* Navegación para Escritorio */}
           <div className="hidden md:flex items-center space-x-6 text-sm">
-            {[
-              { id: 'about', label: '/about' },
-              { id: 'projects', label: '/projects' },
-              { id: 'experience', label: '/experience' },
-              { id: 'skills', label: '/skills' },
-              { id: 'contact', label: '/contact' },
-            ].map((link) => (
+            {NAV_LINKS.map((link) => (
               <button
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
@@ -78,13 +93,7 @@ const App: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-slate-900 border-b border-console-dim shadow-xl">
             <div className="flex flex-col p-4 space-y-4">
-              {[
-                { id: 'about', label: '/about' },
-                { id: 'projects', label: '/projects' },
-                { id: 'experience', label: '/experience' },
-                { id: 'skills', label: '/skills' },
-                { id: 'contact', label: '/contact' },
-              ].map((link) => (
+              {NAV_LINKS.map((link) => (
                 <button
                   key={link.id}
                   onClick={() => scrollTo(link.id)}
@@ -118,12 +127,19 @@ const App: React.FC = () => {
                   {PROFILE.role} | {PROFILE.location}
                 </p>
                 <div className="pt-4 flex flex-wrap gap-4">
-                  <button 
+                  <button
                     onClick={() => scrollTo('contact')}
                     className="bg-console-green text-black px-6 py-2 rounded font-bold hover:bg-console-accent transition-colors flex items-center gap-2 group"
                   >
                     <Mail className="w-4 h-4 group-hover:animate-pulse" />
                     Contratar
+                  </button>
+                  <button
+                    onClick={() => scrollTo('projects')}
+                    className="border border-console-green text-console-green px-6 py-2 rounded font-bold hover:bg-console-green/10 transition-colors flex items-center gap-2"
+                  >
+                    <Terminal className="w-4 h-4" />
+                    Ver proyectos
                   </button>
                 </div>
               </div>
@@ -140,19 +156,45 @@ const App: React.FC = () => {
           </div>
         </Section>
 
+        {/* Sección: Webs para negocios */}
+        <Section id="negocios" title="webs_para_negocios" icon={Store}>
+          <div className="bg-slate-900/50 border border-console-dim rounded p-6 md:p-8 mb-8">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">{BUSINESS_OFFER.title}</h3>
+            <p className="text-slate-300 leading-relaxed mb-6">{BUSINESS_OFFER.text}</p>
+            <ul className="space-y-2 mb-8">
+              {BUSINESS_OFFER.bullets.map((bullet, idx) => (
+                <li key={idx} className="flex items-start text-sm text-slate-400">
+                  <span className="mr-2 text-console-green">{'>'}</span>
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+            <a
+              href={getWhatsAppLink(BUSINESS_OFFER.whatsappMessage)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-console-green text-black px-6 py-3 rounded font-bold hover:bg-console-accent transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              {BUSINESS_OFFER.ctaLabel}
+            </a>
+          </div>
+          {/* Tarjetas de clientes con sitio en vivo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {PROJECTS.filter((p) => p.type === 'cliente' && p.url).map((project) => (
+              <ProjectCard key={project.name} project={project} />
+            ))}
+          </div>
+        </Section>
+
         {/* Sección de Proyectos */}
         <Section id="projects" title="proyectos" icon={Terminal}>
            {/* Grid de 2 columnas en pantallas medianas */}
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             {PROJECTS.map((project, idx) => (
-               <ProjectCard key={idx} project={project} />
+             {/* Excluye las webs de clientes que ya se muestran en /negocios */}
+             {PROJECTS.filter((p) => !(p.type === 'cliente' && p.url)).map((project) => (
+               <ProjectCard key={project.name} project={project} />
              ))}
-             {/* Marcador para futuros proyectos */}
-             <div className="border border-dashed border-console-dim p-8 rounded flex flex-col items-center justify-center text-console-dim min-h-[250px] bg-slate-900/10 hover:bg-slate-900/20 transition-colors">
-               <Code className="w-8 h-8 mb-4 opacity-50" />
-               <span className="text-sm font-bold opacity-75">Más proyectos en proceso...</span>
-               <span className="text-xs mt-2 opacity-50">Compilando código...</span>
-             </div>
            </div>
         </Section>
 
@@ -175,7 +217,7 @@ const App: React.FC = () => {
                 <div className="bg-slate-900 p-4 rounded border border-slate-800">
                    <p className="mb-4 text-slate-300">{job.description}</p>
                    {job.tasks.length > 0 && (
-                     <ul className="space-y-2 mb-4">
+                     <ul className="space-y-2">
                        {job.tasks.map((task, tIdx) => (
                          <li key={tIdx} className="flex items-start text-sm text-slate-400">
                            <span className="mr-2 text-console-dim">{'>'}</span>
@@ -183,11 +225,6 @@ const App: React.FC = () => {
                          </li>
                        ))}
                      </ul>
-                   )}
-                   {job.contact && (
-                     <div className="text-xs text-slate-500 mt-2 font-italic border-t border-slate-800 pt-2">
-                       {job.contact}
-                     </div>
                    )}
                 </div>
               </div>
@@ -255,7 +292,7 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                  <p className="text-slate-400 mb-6 leading-relaxed">
-                   Actualmente buscando nuevas oportunidades. Si tienes una propuesta interesante o simplemente quieres saludar, elige tu protocolo de comunicación preferido.
+                   {CONTACT_CONFIG.intro}
                  </p>
                  
                  <div className="space-y-4">
@@ -312,45 +349,39 @@ const App: React.FC = () => {
                     <ArrowRight className="w-4 h-4 text-console-dim group-hover:text-console-green transform group-hover:translate-x-1 transition-all" />
                   </a>
 
-                  {/* Opción de Email */}
-                  <a 
-                    href={getEmailLink()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group w-full text-left bg-slate-900 hover:bg-blue-900/20 border border-console-dim hover:border-blue-400 p-4 rounded transition-all flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-5 h-5 text-blue-400" />
-                      <div>
-                        <div className="text-blue-400 font-bold text-xs mb-1">Redactar MAIL</div>
-                        <div className="text-slate-400 text-xs">{PROFILE.email}</div>
+                  {/* Opción de Email: mailto + copiar al portapapeles */}
+                  <div className="w-full flex items-stretch gap-2">
+                    <a
+                      href={getEmailLink()}
+                      className="group flex-1 text-left bg-slate-900 hover:bg-blue-900/20 border border-console-dim hover:border-blue-400 p-4 rounded transition-all flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-5 h-5 text-blue-400" />
+                        <div>
+                          <div className="text-blue-400 font-bold text-xs mb-1">Redactar MAIL</div>
+                          <div className="text-slate-400 text-xs break-all">{PROFILE.email}</div>
+                        </div>
                       </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-console-dim group-hover:text-blue-400 transform group-hover:translate-x-1 transition-all" />
-                  </a>
-
-                  {/* Opción de Descarga de CV (Google Drive) */}
-                  <a 
-                    href={CONTACT_CONFIG.googleDriveCV}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group w-full text-left bg-slate-900 hover:bg-purple-900/20 border border-console-dim hover:border-purple-400 p-4 rounded transition-all flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-purple-400" />
-                      <div>
-                        <div className="text-purple-400 font-bold text-xs mb-1">Descargar CV</div>
-                        <div className="text-slate-400 text-xs">Enlace a Google Drive</div>
-                      </div>
-                    </div>
-                    <Download className="w-4 h-4 text-console-dim group-hover:text-purple-400 transform group-hover:translate-y-0.5 transition-all" />
-                  </a>
+                      <ArrowRight className="w-4 h-4 text-console-dim group-hover:text-blue-400 transform group-hover:translate-x-1 transition-all" />
+                    </a>
+                    <button
+                      onClick={copyEmail}
+                      title="Copiar email al portapapeles"
+                      className={`px-3 rounded border transition-all flex flex-col items-center justify-center gap-1 text-[10px] font-bold ${
+                        emailCopied
+                          ? 'border-console-green bg-green-900/20 text-console-green'
+                          : 'border-console-dim bg-slate-900 text-slate-400 hover:border-blue-400 hover:text-blue-400'
+                      }`}
+                    >
+                      {emailCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {emailCopied ? 'COPIADO' : 'COPIAR'}
+                    </button>
+                  </div>
 
                 </div>
                 
-                <div className="mt-4 pt-2 border-t border-slate-800 text-[10px] text-slate-600 flex justify-between">
+                <div className="mt-4 pt-2 border-t border-slate-800 text-[10px] text-slate-600">
                   <span>ESTADO: EN LÍNEA</span>
-                  <span>ENCRIPTACIÓN: ACTIVADA</span>
                 </div>
               </div>
             </div>
